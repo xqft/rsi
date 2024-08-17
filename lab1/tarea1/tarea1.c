@@ -16,6 +16,7 @@ PROCESS_THREAD(sensor_monitor, ev, data)
 {
   PROCESS_BEGIN();
 
+  // Declare static variables
   static int temp;
   static int volt;
   static int i;
@@ -26,15 +27,17 @@ PROCESS_THREAD(sensor_monitor, ev, data)
   {
     PROCESS_WAIT_EVENT();
 
+    // Handle timer event
     if (ev == PROCESS_EVENT_TIMER && data == &et)
     {
       printf("Event: Timer triggered\n\r");
 
+      // Initialize temp and voltage
       temp = 0;
       volt = 0;
 
+      // Start measuring
       SENSORS_ACTIVATE(batmon_sensor);
-
       for (i = 0; i < NUM_SAMPLES; i++)
       {
         // IIR, alpha = 0.5
@@ -44,7 +47,6 @@ PROCESS_THREAD(sensor_monitor, ev, data)
         etimer_set(&et, CLOCK_SECOND / 4); // Wait for 250 ms between samples
         PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER && data == &et);
       }
-
       SENSORS_DEACTIVATE(batmon_sensor);
 
       // Show values
@@ -54,7 +56,7 @@ PROCESS_THREAD(sensor_monitor, ev, data)
       leds_toggle(LEDS_ALL);
 
       // Reset the timer
-      etimer_set(&et, CLOCK_SECOND * 10);
+      etimer_set(&et, CLOCK_SECOND * 5);
     }
   }
 

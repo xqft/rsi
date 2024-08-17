@@ -18,6 +18,7 @@ PROCESS_THREAD(sensor_monitor, ev, data)
 {
   PROCESS_BEGIN();
 
+  // Declare static variables
   static int temp;
   static int volt;
   static int i;
@@ -29,15 +30,17 @@ PROCESS_THREAD(sensor_monitor, ev, data)
   {
     PROCESS_WAIT_EVENT();
 
+    // Handle timer event
     if (ev == PROCESS_EVENT_TIMER && data == &et)
     {
       printf("Event: Timer triggered\n\r");
 
+      // Initialize temp and voltage
       temp = 0;
       volt = 0;
 
+      // Start measuring
       SENSORS_ACTIVATE(batmon_sensor);
-
       for (i = 0; i < NUM_SAMPLES; i++)
       {
         // IIR, alpha = 0.5
@@ -47,17 +50,16 @@ PROCESS_THREAD(sensor_monitor, ev, data)
         etimer_set(&et, CLOCK_SECOND / 4); // Wait for 250 ms between samples
         PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER && data == &et);
       }
-
       SENSORS_DEACTIVATE(batmon_sensor);
 
       // Post event
       medidas[0] = temp;
       medidas[1] = volt;
-      medidaslistas = process_alloc_event();
-      process_post(&publicar, medidaslistas, &medidas);
+      medidaslistas = process_alloc_event(); // Alloc event in memory
+      process_post(&publicar, medidaslistas, &medidas); // Post event to "publicar" process
 
       // Reset the timer
-      etimer_set(&et, CLOCK_SECOND * 10);
+      etimer_set(&et, CLOCK_SECOND * 5);
     }
   }
 
@@ -71,14 +73,17 @@ PROCESS_THREAD(publicar, ev, data)
   while (1)
   {
     PROCESS_WAIT_EVENT();
+
+    // Print values depending on event
     if (ev == medidaslistas)
     {
       int *medidas = data;
       printf("Temperatura promedio: %d °C\n\r", medidas[0]);
       printf("Voltaje promedio: %d mV\n\r", medidas[1]);
-
-      leds_toggle(LEDS_ALL);
     }
+
+    leds_toggle(LEDS_ALL); // Toggle leds for any event
   }
+
   PROCESS_END();
 }
