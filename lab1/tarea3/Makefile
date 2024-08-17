@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = tarea2
+CONTIKI_PROJECT = tarea3
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = $(HOME)/contiki-ng
