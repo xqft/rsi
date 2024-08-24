@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = tarea1
+CONTIKI_PROJECT = udp-multicast
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = $(HOME)/contiki-ng
