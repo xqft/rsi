@@ -46,9 +46,11 @@ PROCESS_THREAD(udp_process, ev, data)
   static struct etimer periodic_timer;
   static char str[36];
 	static radio_value_t ch_num;
-  uip_ipaddr_t dest_ipaddr;
+  static uip_ipaddr_t dest_ipaddr;
 
   PROCESS_BEGIN();
+
+	uip_ip6addr(&dest_ipaddr, 0xfe80, 0x0000, 0x0000, 0x0000, 0x0212, 0x7401, 0x0001, 0x0101);
 
   /* Initialize UDP connection */
   simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_rx_callback);
@@ -63,14 +65,13 @@ PROCESS_THREAD(udp_process, ev, data)
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
 
-    /* Generates multicast address */
-    uip_create_linklocal_allnodes_mcast(&dest_ipaddr);
+    
 
-    LOG_INFO("Sending multicast (IP: ");
+    LOG_INFO("Conectando con servidor en IP: ");
     LOG_INFO_6ADDR(&dest_ipaddr);   //all motes connect to this IP, IP of multicast
-    LOG_INFO_(")\n");
+    LOG_INFO_("\n");
 
-    snprintf(str, sizeof(str), "Hello everybody! I am node %x.", node_id);
+    snprintf(str, sizeof(str), "Hola soy el cliente %x.", node_id);
     simple_udp_sendto(&udp_conn, str, strlen(str), &dest_ipaddr); // send info to multicast IP
 		leds_toggle(LEDS_GREEN);
 
