@@ -44,7 +44,7 @@ udp_rx_callback(struct simple_udp_connection *c,
 PROCESS_THREAD(udp_process, ev, data)
 {
   
-  static char str[36];
+  static char str[40];
 	static radio_value_t ch_num;
   uip_ipaddr_t dest_ipaddr;
 
