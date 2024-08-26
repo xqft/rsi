@@ -8,6 +8,7 @@
 #include <inttypes.h>
 
 #include "sys/log.h"
+
 #define LOG_MODULE "App"
 #define LOG_LEVEL LOG_LEVEL_INFO
 
