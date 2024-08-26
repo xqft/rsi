@@ -48,7 +48,7 @@ PROCESS_THREAD(udp_process, ev, data)
 
   PROCESS_BEGIN();
 
-  uip_ip6addr(&dest_ipaddr, 0xfe80, 0x0000, 0x0000, 0x0000, 0x0212, 0x4b00, 0x1204, 0xde22);
+  uip_ip6addr(&dest_ipaddr, 0xfe80, 0x0000, 0x0000, 0x0000, 0x0212, 0x4b00, 0x1204, 0x0002);
 
   /* Initialize UDP connection */
   simple_udp_register(&udp_conn, UDP_PORT, NULL, UDP_PORT, udp_rx_callback);
