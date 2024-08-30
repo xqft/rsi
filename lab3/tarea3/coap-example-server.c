@@ -64,7 +64,8 @@ extern coap_resource_t
     res_push,
     res_event,
     res_sub,
-    res_b1_sep_b2;
+    res_b1_sep_b2,
+    res_voltage;
 #if PLATFORM_HAS_LEDS
 extern coap_resource_t res_leds, res_toggle;
 #endif
@@ -102,6 +103,7 @@ PROCESS_THREAD(er_example_server, ev, data)
   coap_activate_resource(&res_chunks, "test/chunks");
   coap_activate_resource(&res_separate, "test/separate");
   coap_activate_resource(&res_push, "test/push");
+  coap_activate_resource(&res_voltage, "custom/voltage");
 #if PLATFORM_HAS_BUTTON
   coap_activate_resource(&res_event, "sensors/button");
 #endif /* PLATFORM_HAS_BUTTON */
