@@ -27,8 +27,8 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
     if (accept == -1 || accept == TEXT_PLAIN)
     {
         coap_set_header_content_format(response, TEXT_PLAIN);
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%d", timestamp_get());
-        coap_set_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
+        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%ld", timestamp_get()); // escribo en "buffer" el resultado de timestamp_get()
+        coap_set_payload(response, (uint8_t *)buffer, strlen((char *)buffer)); // mando el buffer como respuesta
     }
     else
     {
@@ -41,9 +41,9 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
 static void
 res_put_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-    const uint8_t *bytes = NULL;
-    coap_get_payload(request, &bytes);
+    const uint8_t *bytes = NULL; // defino un puntero a los bytes del payload (string del timestamp)
+    coap_get_payload(request, &bytes); // seteo bytes para que apunte al payload
 
-    unsigned long timestamp = atol(bytes);
+    unsigned long timestamp = atol((char *)bytes); // convierto el string del payload a un unsinged long
     timestamp_set(timestamp);
 }
