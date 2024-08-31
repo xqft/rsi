@@ -14,8 +14,8 @@ static void res_put_handler(coap_message_t *request, coap_message_t *response, u
 RESOURCE(res_time,
          "title=\"Time\";rt=\"Get/Set Timestamp\"",
          res_get_handler,
-         res_put_handler,
          NULL,
+         res_put_handler,
          NULL);
 
 static void
