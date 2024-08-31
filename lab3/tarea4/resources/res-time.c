@@ -1,24 +1,20 @@
 #include "contiki.h"
+#include "coap-engine.h"
+#include "timestamp.h"
 
 #include <string.h>
 #include <stdio.h>
-#include "coap-engine.h"
+#include <stdlib.h>
 
 #define NUM_SAMPLES 5
 
-#ifdef CONTIKI_TARGET_CC26X0_CC13X0
-#pragma message("Utilizando el target cc26x0-cc13x0")
-#include "batmon-sensor.h"
-#else
-#pragma message("Utilizando un target distinto al cc26x0-cc13x0")
-#endif
-
 static void res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+static void res_put_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
-RESOURCE(res_voltage,
-         "title=\"Voltage\";rt=\"Voltage\"",
+RESOURCE(res_time,
+         "title=\"Time\";rt=\"Get/Set Timestamp\"",
          res_get_handler,
-         NULL,
+         res_put_handler,
          NULL,
          NULL);
 
@@ -31,25 +27,7 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
     if (accept == -1 || accept == TEXT_PLAIN)
     {
         coap_set_header_content_format(response, TEXT_PLAIN);
-
-        #ifdef CONTIKI_TARGET_CC26X0_CC13X0
-        // Initialize temp and voltage
-        volt = 0;
-
-        // Start measuring
-        SENSORS_ACTIVATE(batmon_sensor);
-        for (i = 0; i < NUM_SAMPLES; i++)
-        {
-            // IIR, alpha = 0.5
-            volt = (((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5) + volt) / 2;
-        }
-        SENSORS_DEACTIVATE(batmon_sensor);
-
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%d", volt);
-        #else
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "3.3v (const)");
-        #endif
-
+        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%d", timestamp_get());
         coap_set_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
     }
     else
@@ -58,4 +36,14 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
         const char *msg = "Supporting content-types text/plain";
         coap_set_payload(response, msg, strlen(msg));
     }
+}
+
+static void
+res_put_handler(coap_message_t *request, coap_message_t *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+    const uint8_t *bytes = NULL;
+    coap_get_payload(request, &bytes);
+
+    unsigned long timestamp = atol(bytes);
+    timestamp_set(timestamp);
 }
