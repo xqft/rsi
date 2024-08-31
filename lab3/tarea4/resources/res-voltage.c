@@ -1,8 +1,9 @@
 #include "contiki.h"
+#include "coap-engine.h"
+#include "timestamp.h"
 
 #include <string.h>
 #include <stdio.h>
-#include "coap-engine.h"
 
 #define NUM_SAMPLES 5
 
@@ -45,9 +46,9 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
         }
         SENSORS_DEACTIVATE(batmon_sensor);
 
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%d", volt);
+        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%dv, timestamp: %ld", volt, timestamp_get());
         #else
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "3.3v (const)");
+        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "3.3v (const), timestamp: %ld", timestamp_get());
         #endif
 
         coap_set_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
