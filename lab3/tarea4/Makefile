@@ -10,7 +10,7 @@ MODULES_REL += ./resources
 # Include libs
 MODULES_REL += ./lib
 
-CONTIKI=../../../..
+CONTIKI = $(HOME)/contiki-ng
 
 # Include the CoAP implementation
 include $(CONTIKI)/Makefile.dir-variables

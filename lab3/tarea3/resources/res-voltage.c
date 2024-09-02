@@ -34,18 +34,19 @@ res_get_handler(coap_message_t *request, coap_message_t *response, uint8_t *buff
 
         #ifdef CONTIKI_TARGET_CC26X0_CC13X0
         // Initialize temp and voltage
-        volt = 0;
+        int volt = 0;
 
         // Start measuring
         SENSORS_ACTIVATE(batmon_sensor);
-        for (i = 0; i < NUM_SAMPLES; i++)
+        
+        for (int i = 0; i < NUM_SAMPLES; i++)
         {
             // IIR, alpha = 0.5
             volt = (((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5) + volt) / 2;
         }
         SENSORS_DEACTIVATE(batmon_sensor);
 
-        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "%d", volt);
+        snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "El voltaje de alimentación es %d mv", volt);
         #else
         snprintf((char *)buffer, COAP_MAX_CHUNK_SIZE, "3.3v (const)");
         #endif
