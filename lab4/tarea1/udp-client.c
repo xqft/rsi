@@ -6,6 +6,7 @@
 #include "sys/node-id.h"
 #include <stdint.h>
 #include <inttypes.h>
+#include "dev/button-hal.h"
 
 #include "sys/log.h"
 
@@ -20,9 +21,12 @@
 static struct simple_udp_connection udp_conn; // udp_conn saves info of the comunication
 const int GROUP_NUM = 1;
 
+process_event_t new_destination_id;
+
 /*---------------------------------------------------------------------------*/
 PROCESS(udp_process, "UDP client");
-AUTOSTART_PROCESSES(&udp_process);
+PROCESS(dest_config, "Destination node ID config");
+AUTOSTART_PROCESSES(&udp_process, &dest_config);
 /*---------------------------------------------------------------------------*/
 static void // When msg recived this function is excecuted
 udp_rx_callback(struct simple_udp_connection *c,
@@ -62,18 +66,69 @@ PROCESS_THREAD(udp_process, ev, data)
   etimer_set(&periodic_timer, random_rand() % SEND_INTERVAL); // random time 0 to 10 s
   while (1)
   {
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
+    PROCESS_WAIT_EVENT();
 
-    LOG_INFO("Conectando con servidor en IP: ");
-    LOG_INFO_6ADDR(&dest_ipaddr); // all motes connect to this IP, IP of multicast
-    LOG_INFO_("\n\r");
+    if (ev == PROCESS_EVENT_TIMER && data == &periodic_timer)
+    {
+      LOG_INFO("Conectando con servidor en IP: ");
+      LOG_INFO_6ADDR(&dest_ipaddr); // all motes connect to this IP, IP of multicast
+      LOG_INFO_("\n\r");
 
-    snprintf(str, sizeof(str), "Hola soy el cliente %x", node_id);
-    simple_udp_sendto(&udp_conn, str, strlen(str), &dest_ipaddr); // send info to multicast IP
-    leds_toggle(LEDS_GREEN);
+      snprintf(str, sizeof(str), "Hola soy el cliente %x", node_id);
+      simple_udp_sendto(&udp_conn, str, strlen(str), &dest_ipaddr); // send info to multicast IP
+      leds_toggle(LEDS_GREEN);
 
-    /* Add some jitter */
-    etimer_set(&periodic_timer, SEND_INTERVAL - CLOCK_SECOND + (random_rand() % (2 * CLOCK_SECOND))); // random time 9 to 11 s
+      /* Add some jitter */
+      etimer_set(&periodic_timer, SEND_INTERVAL - CLOCK_SECOND + (random_rand() % (2 * CLOCK_SECOND))); // random time 9 to 11 s
+    }
+    else if (ev == new_destination_id)
+    {
+      uint16_t *node_id = data;
+      LOG_INFO("Nuevo nodo destino de ID: %d\n\r", *node_id);
+      uip_ip6addr(&dest_ipaddr, 0xfd00, 0x0000, 0x0000, 0x0000, 0x0200 + *node_id, *node_id, *node_id, *node_id);
+    }
+  }
+
+  PROCESS_END();
+}
+
+PROCESS_THREAD(dest_config, ev, data)
+{
+  static struct etimer timer;
+  static int btn_count = 0;
+  static int node_id;
+  static button_hal_button_t *btn;
+
+  PROCESS_BEGIN();
+
+  new_destination_id = process_alloc_event();
+
+  while (1)
+  {
+    PROCESS_WAIT_EVENT();
+
+    // Some button was pressed
+    if (ev == button_hal_press_event)
+    {
+      btn = (button_hal_button_t *)data;
+      LOG_INFO("Boton (%s) presionado\n\r", BUTTON_HAL_GET_DESCRIPTION(btn));
+
+      // Check that the pressed button is BTN-1
+      if (btn == button_hal_get_by_id(BUTTON_HAL_ID_BUTTON_ZERO))
+      {
+        btn_count++;
+        LOG_INFO("BTN-1 detectado, nueva cuenta: %d\n\r", btn_count);
+        etimer_set(&timer, 3 * CLOCK_SECOND);
+      }
+    }
+
+    // Send event and reset node_id when timeout
+    if (ev == PROCESS_EVENT_TIMER && data == &timer)
+    {
+      node_id = btn_count;
+      btn_count = 0;
+      process_post(&udp_process, new_destination_id, &node_id);
+    }
   }
 
   PROCESS_END();
