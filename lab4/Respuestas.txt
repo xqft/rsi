@@ -1,0 +1,30 @@
+Pings:
+Root:
+TTL: 64
+RTT: 3.442 ms
+
+Cliente 3:
+TTL: 63
+RTT: 53.5 ms
+
+Cliente 2:
+TTL: 62
+RTT: 126.4 ms
+
+Cliente 1:
+TTL: 61
+RTT: 181.2 ms
+
+El TTL es el tiempo de vida de los paquetes.
+En este caso es la cantidad de saltos que puede dar en la red hasta ser descartado.
+Como razonable, decrementa en 1 por cada salto entre nodo que realiza.
+Para el calculo de los RTT se tomo un promedio de 4 muestras que devolvio el comando ping.
+Se observa que los valores retornados tienen congruencia con las de los nodos con el root, a mayor distancia mayor RTT.
+Se encontro un problema con el campo de checksum, el mismo daba error en los paquetes de ping,
+para solucionarlo se encontro en post una manera de generarle contexto a Wireshark. 
+Dentro de Wireshark Edit->Preferences->Protocol->6LoWPAN-> luego en Contexto 0 se agrego fd00::/56.
+
+
+
+
+

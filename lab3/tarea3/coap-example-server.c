@@ -150,4 +150,4 @@ PROCESS_THREAD(er_example_server, ev, data)
   } /* while (1) */
 
   PROCESS_END();
-}
+}}
