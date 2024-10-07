@@ -1,0 +1,8 @@
+[INFO: Energest  ] --- Period summary #21 (59 seconds)
+[INFO: Energest  ] Total time  :    3932050
+[INFO: Energest  ] CPU         :     229586/   3932050 (58 permil)
+[INFO: Energest  ] LPM         :      61850/   3932050 (15 permil)
+[INFO: Energest  ] Deep LPM    :    3640614/   3932050 (925 permil)
+[INFO: Energest  ] Radio Tx    :       5256/   3932050 (1 permil)
+[INFO: Energest  ] Radio Rx    :     150780/   3932050 (38 permil)
+[INFO: Energest  ] Radio total :     156036/   3932050 (39 permil)
