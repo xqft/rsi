@@ -1,1 +1,2 @@
 #define UIP_CONF_BUFFER_SIZE 250
+#define LOG_CONF_LEVEL_6LOWPAN                     LOG_LEVEL_DBG
